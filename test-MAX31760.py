@@ -92,3 +92,31 @@ print 'pulse_stretch_enable=' + str(cr3['pulse_stretch_enable'])
 print 'tach2_enable=' + str(cr3['tach2_enable'])
 print 'tach1_enable=' + str(cr3['tach1_enable'])
 
+print '\nWriting local overtemp setpoint'
+device.writeLocalOvertempSetpoint(50.5)
+
+print '\nReading local overtemp setpoint'
+lots = device.readLocalOvertempSetpoint()
+print 'Local overtemp setpoint=' + str(lots)
+
+print '\nWriting remote overtemp setpoint'
+device.writeRemoteOvertempSetpoint(50.5)
+
+print '\nReading remote overtemp setpoint'
+lots = device.readRemoteOvertempSetpoint()
+print 'Local overtemp setpoint=' + str(lots)
+
+print '\nWriting local temp high setpoint'
+device.writeLocalTempHighSetpoint(45.5)
+
+print '\nReading local temp high setpoint'
+lots = device.readLocalTempHighSetpoint()
+print 'Local overtemp setpoint=' + str(lots)
+
+print '\nWriting remote temp high setpoint'
+device.writeRemoteTempHighSetpoint(45.5)
+
+print '\nReading remote temp high setpoint'
+lots = device.readRemoteTempHighSetpoint()
+print 'Local overtemp setpoint=' + str(lots)
+

@@ -6,16 +6,19 @@
 ## Python class for MAX31760
 ##
 ##### Description #####
+##
 ## Basic control functions for the MAX31760 fan speed controller. Extensive 
 ## code re-use from the Mikroe Fan 2 Click C library.
 ##
 ## Latest version can be found https://github.com/rudybrian/MAX31760-Python/
 ##
 ##### Additional References #####
+##
 ## https://www.maximintegrated.com/en/products/sensors/MAX31760.html
 ## https://www.mikroe.com/fan-2-click
 ## 
 ##### Revision History #####
+##
 ## v0.1 01/10/2021 Brian Rudy (brudyNO@SPAMpraecogito.com) First working version
 ##
 ##########
@@ -251,12 +254,18 @@ class MAX31760(Adafruit_I2C):
         return result
 
     def writeTemp(self, start_addr, val):
+        if ((start_addr != self.MAX31760_RHSH) and (start_addr != self.MAX31760_LOTSH) and (start_addr != self.MAX31760_ROTSH) and (start_addr != self.MAX31760_LHSH)):
+            return False
         if ((val < -55) or (val > 125)):
             return False
         res = self.MAX31760_RESOL_TEMP_CELS
         res /= 1 << 5
         temp = val / res
-        self.bus.write16(start_addr, temp & 0xFFE0)
+        print 'temp before masking is ' + str(int(temp))
+        # 16 bit operations are having issues, so using two 8 bit operations for now. Will need to debug this later
+        #self.bus.write16(start_addr, int(temp) & 0xFFE0)
+        self.bus.write8(start_addr, int(temp) >> 8)
+        self.bus.write8(start_addr + 1, int(temp) & 0xFF)
         return True
 
     # Read the status register
@@ -338,6 +347,46 @@ class MAX31760(Adafruit_I2C):
     # Read the remote temperature sensor
     def readRemoteTemp(self):
         result = self.readTemp(self.MAX31760_RTH)
+        return result
+
+    # Write local overtemp setpoint
+    def writeLocalOvertempSetpoint(self, val):
+        result = self.writeTemp(self.MAX31760_LOTSH, val)
+        return result
+
+    # Read local overtemp setpoint
+    def readLocalOvertempSetpoint(self):
+        result = self.readTemp(self.MAX31760_LOTSH)
+        return result
+
+    # Write remote overtemp setpoint
+    def writeRemoteOvertempSetpoint(self, val):
+        result = self.writeTemp(self.MAX31760_ROTSH, val)
+        return result
+
+    # Read remote overtemp setpoint
+    def readRemoteOvertempSetpoint(self):
+        result = self.readTemp(self.MAX31760_ROTSH)
+        return result
+
+    # Write local temp high setpoint
+    def writeLocalTempHighSetpoint(self, val):
+        result = self.writeTemp(self.MAX31760_LHSH, val)
+        return result
+
+    # Read local temp high setpoint
+    def readLocalTempHighSetpoint(self):
+        result = self.readTemp(self.MAX31760_LHSH)
+        return result
+
+    # Write remote temp high setpoint
+    def writeRemoteTempHighSetpoint(self, val):
+        result = self.writeTemp(self.MAX31760_RHSH, val)
+        return result
+
+    # Read remote temp high setpoint
+    def readRemoteTempHighSetpoint(self):
+        result = self.readTemp(self.MAX31760_RHSH)
         return result
 
     # Set some sane defaults
