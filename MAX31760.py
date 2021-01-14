@@ -268,6 +268,18 @@ class MAX31760(Adafruit_I2C):
         self.bus.write8(start_addr + 1, int(temp) & 0xFF)
         return True
 
+    def readTach(self, start_addr):
+        if ((start_addr != self.MAX31760_TCTH) and (start_addr != self.MAX31760_TC1H) and (start_addr != self.MAX31760_TC2H)):
+            return False
+        tach_high = self.bus.readU8(start_addr)
+        tach_low = self.bus.readU8(start_addr + 1)
+        tach = (tach_high << 8) | tach_low
+        res = 100000
+        res /= tach
+        res /= 4
+        res *= 60
+        return res        
+
     # Read the status register
     def readStatus(self):
         status_int = self.bus.readU8(self.MAX31760_SR)
@@ -402,4 +414,18 @@ class MAX31760(Adafruit_I2C):
         self.bus.write8(self.MAX31760_CR3, cr3_val | self.MAX31760_CTRL3_CLR_FAIL)
         return True
 
- 
+    # Read the Tach count threshold
+    def readTachCountThreshold(self):
+        tach = self.readTach(self.MAX31760_TCTH)
+        return tach
+
+    # Read tach 1
+    def readTach1(self):
+        tach = self.readTach(self.MAX31760_TC1H)
+        return tach
+
+    # Read tach 2
+    def readTach2(self):
+        tach = self.readTach(self.MAX31760_TC2H)
+        return tach
+

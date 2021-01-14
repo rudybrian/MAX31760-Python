@@ -120,3 +120,15 @@ print '\nReading remote temp high setpoint'
 lots = device.readRemoteTempHighSetpoint()
 print 'Local overtemp setpoint=' + str(lots)
 
+print '\nReading tach count threshold'
+tct = device.readTachCountThreshold()
+print 'Tach count threshold=' + str(tct)
+
+print '\nReading tach 1'
+tach1 = device.readTach1()
+print 'Tach 1=' + str(tach1)
+
+print '\nReading tach 2'
+tach2 = device.readTach2()
+print 'Tach 2=' + str(tach2)
+
