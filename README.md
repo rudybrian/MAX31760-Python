@@ -10,3 +10,5 @@ https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/blob/legacy/Adafru
 https://www.maximintegrated.com/en/products/sensors/MAX31760.html
 
 https://www.mikroe.com/fan-2-click
+
+http://ww1.microchip.com/downloads/en/AppNotes/00001838A.pdf
