@@ -280,6 +280,15 @@ class MAX31760(Adafruit_I2C):
         res *= 60
         return res 
 
+    # Write the tach threshold
+    def writeTachThreshold(self, RPM):
+        res = 100000
+        res /= RPM
+        res /= 2   # Two pulses per revolution is standard for four pin PC PWM cooling fans. We might need to make this configurable.
+        tach = res * 60
+        self.bus.write8(self.MAX31760_TCTH, tach)
+        return True
+
     # Read the remote diode ideality factor
     def readIdeality(self):
         ideality_raw = self.bus.readU8(self.MAX31760_IFR)
@@ -296,6 +305,21 @@ class MAX31760(Adafruit_I2C):
             return True
         else:
             return False
+
+    # Write the fan duty cycle for direct speed control
+    def writeDirectSpeedControl(self, duty_percent):
+        duty = int(duty_percent / self.MAX31760_FAN2_RESOL_SPEED_PER)
+        self.bus.write8(self.MAX31760_PWMR, duty)
+        return True
+
+    # Read the current duty cycle
+    def readCurrentDutyCycle(self):
+        duty = self.bus.readU8(self.MAX31760_PWMV)
+        if (duty == 0xFF):
+            duty_percent = 100.0
+        else:
+            duty_percent = duty * 100 / 256
+        return duty_percent
 
     # Read the status register
     def readStatus(self):

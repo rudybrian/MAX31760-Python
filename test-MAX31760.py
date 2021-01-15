@@ -52,6 +52,13 @@ print '\nReading remote temperature'
 remotetemp = device.readRemoteTemp()
 print 'Remote Temp=' + str(remotetemp)
 
+print '\nSetting the direct PWM duty cycle to 50%'
+device.writeDirectSpeedControl(50)
+
+print '\nReading the current duty cycle'
+current_duty_percent = device.readCurrentDutyCycle()
+print 'Current duty cycle=' + str(current_duty_percent)
+
 print '\nReading the status register'
 status = device.readStatus()
 print 'program_corrupt=' + str(status['program_corrupt'])
