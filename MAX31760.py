@@ -261,7 +261,6 @@ class MAX31760(Adafruit_I2C):
         res = self.MAX31760_RESOL_TEMP_CELS
         res /= 1 << 5
         temp = val / res
-        print 'temp before masking is ' + str(int(temp))
         # 16 bit operations are having issues, so using two 8 bit operations for now. Will need to debug this later
         #self.bus.write16(start_addr, int(temp) & 0xFFE0)
         self.bus.write8(start_addr, int(temp) >> 8)
@@ -276,9 +275,27 @@ class MAX31760(Adafruit_I2C):
         tach = (tach_high << 8) | tach_low
         res = 100000
         res /= tach
-        res /= 4
+        #res /= 4
+        res /= 2   # Two pulses per revolution is standard for four pin PC PWM cooling fans. We might need to make this configurable.
         res *= 60
-        return res        
+        return res 
+
+    # Read the remote diode ideality factor
+    def readIdeality(self):
+        ideality_raw = self.bus.readU8(self.MAX31760_IFR)
+        # Reverse the keys and values in the dictionary to make matching easier
+        reversed_ideality_dict = {}
+        for key, value in self.MAX31760_IDEALITY.items():
+            reversed_ideality_dict[value] = key
+        return reversed_ideality_dict[ideality_raw]
+ 
+    # Write the remote diode ideality factor
+    def writeIdeality(self, ideality):
+        if (self.MAX31760_IDEALITY[str(ideality)]):
+            self.bus.write8(self.MAX31760_IFR, self.MAX31760_IDEALITY[str(ideality)])
+            return True
+        else:
+            return False
 
     # Read the status register
     def readStatus(self):
