@@ -34,8 +34,8 @@ def MAX31760_start():
 print 'Starting up'
 MAX31760_start()
 
-#print '\nsetting some sane defaults'
-#device.setDefaults()
+print '\nsetting some sane defaults'
+device.setDefaults()
 
 print '\nSetting remote diode ideality factor'
 device.writeIdeality('1.0050')
@@ -52,8 +52,11 @@ print '\nReading remote temperature'
 remotetemp = device.readRemoteTemp()
 print 'Remote Temp=' + str(remotetemp)
 
+#print '\nClearing fan fault'
+#device.clearFF()
+
 print '\nSetting the direct PWM duty cycle to 50%'
-device.writeDirectSpeedControl(50)
+device.writeDirectSpeedControl(50.0)
 
 print '\nReading the current duty cycle'
 current_duty_percent = device.readCurrentDutyCycle()
@@ -122,7 +125,7 @@ print 'Local overtemp setpoint=' + str(lots)
 
 print '\nReading remote overtemp setpoint'
 lots = device.readRemoteOvertempSetpoint()
-print 'Local overtemp setpoint=' + str(lots)
+print 'Remote overtemp setpoint=' + str(lots)
 
 #print '\nWriting local temp high setpoint'
 #device.writeLocalTempHighSetpoint(45.5)
@@ -136,7 +139,7 @@ print 'Local overtemp setpoint=' + str(lots)
 
 print '\nReading remote temp high setpoint'
 lots = device.readRemoteTempHighSetpoint()
-print 'Local overtemp setpoint=' + str(lots)
+print 'Remote overtemp setpoint=' + str(lots)
 
 print '\nReading tach count threshold'
 tct = device.readTachCountThreshold()
@@ -149,4 +152,12 @@ print 'Tach 1=' + str(tach1)
 print '\nReading tach 2'
 tach2 = device.readTach2()
 print 'Tach 2=' + str(tach2)
+
+print '\nWriting fan LUT value for lt18 to 99'
+device.writeFanLUT('lt18', 99)
+
+print '\nReading the fan LUT'
+fan_LUT = device.readFanLUT()
+for key in sorted(fan_LUT):
+    print(key, '->', fan_LUT[key])
 

@@ -222,6 +222,59 @@ class MAX31760(Adafruit_I2C):
                              }
 
 
+    ## Ideality LUT ##
+    MAX31760_FAN_LUT       = {
+                             "lt18":    0x20,
+                             "18-20":   0x21,
+                             "20-22":   0x22,
+                             "22-24":   0x23,
+                             "24-26":   0x24,
+                             "26-28":   0x25,
+                             "28-30":   0x26,
+                             "30-32":   0x27,
+                             "32-34":   0x28,
+                             "34-36":   0x29,
+                             "36-38":   0x2A,
+                             "38-40":   0x2B,
+                             "40-42":   0x2C,
+                             "42-44":   0x2D,
+                             "44-46":   0x2E,
+                             "46-48":   0x2F,
+                             "48-50":   0x30,
+                             "50-52":   0x31,
+                             "52-54":   0x32,
+                             "54-56":   0x33,
+                             "56-58":   0x34,
+                             "58-60":   0x35,
+                             "60-62":   0x36,
+                             "62-64":   0x37,
+                             "64-66":   0x38,
+                             "66-68":   0x39,
+                             "68-70":   0x3A,
+                             "70-72":   0x3B,
+                             "72-74":   0x3C,
+                             "74-76":   0x3D,
+                             "76-78":   0x3E,
+                             "78-80":   0x3F,
+                             "80-82":   0x40,
+                             "82-84":   0x41,
+                             "84-86":   0x42,
+                             "86-88":   0x43,
+                             "88-90":   0x44,
+                             "90-92":   0x45,
+                             "92-94":   0x46,
+                             "94-96":   0x47,
+                             "96-98":   0x48,
+                             "98-100":  0x49,
+                             "100-102": 0x4A,
+                             "102-104": 0x4B,
+                             "104-106": 0x4C,
+                             "106-108": 0x4D,
+                             "108-110": 0x4E,
+                             "gt110":   0x4F
+                             }
+
+    #### Functions ####
 
     def __init__(self, addr = None, busnum = -1, debug = False):
         if addr is None:
@@ -308,17 +361,14 @@ class MAX31760(Adafruit_I2C):
 
     # Write the fan duty cycle for direct speed control
     def writeDirectSpeedControl(self, duty_percent):
-        duty = int(duty_percent / self.MAX31760_FAN2_RESOL_SPEED_PER)
+        duty = int(round(duty_percent / self.MAX31760_FAN2_RESOL_SPEED_PER))
         self.bus.write8(self.MAX31760_PWMR, duty)
         return True
 
     # Read the current duty cycle
     def readCurrentDutyCycle(self):
         duty = self.bus.readU8(self.MAX31760_PWMV)
-        if (duty == 0xFF):
-            duty_percent = 100.0
-        else:
-            duty_percent = duty * 100 / 256
+        duty_percent = int(round(duty * self.MAX31760_FAN2_RESOL_SPEED_PER))
         return duty_percent
 
     # Read the status register
@@ -392,6 +442,25 @@ class MAX31760(Adafruit_I2C):
                        }
         return control_dict
 
+    # Read the values in the fan LUT
+    def readFanLUT(self):
+        fan_LUT_dict = {}
+        for key, value in self.MAX31760_FAN_LUT.items():
+            fan_LUT_dict[key] = int(round(self.bus.readU8(value) * self.MAX31760_FAN2_RESOL_SPEED_PER))
+        return fan_LUT_dict
+
+    # Write a value into the fan LUT
+    def writeFanLUT(self, temp_range, duty_percent):
+        current_LUT = self.readFanLUT
+        if (self.MAX31760_FAN_LUT[temp_range]):
+            self.bus.write8(self.MAX31760_FAN_LUT[temp_range], int(round(duty_percent / self.MAX31760_FAN2_RESOL_SPEED_PER, 2)))
+            return True
+        else:
+            return False
+
+
+    ### utility functions
+
     # Read the local temperature sensor
     def readLocalTemp(self):
         result = self.readTemp(self.MAX31760_LTH)
@@ -442,17 +511,24 @@ class MAX31760(Adafruit_I2C):
         result = self.readTemp(self.MAX31760_RHSH)
         return result
 
-    # Set some sane defaults
+    # Set some sane defaults for 4 pin PWM PC fan
+    # 25kHz, positive polarity, pulse stretching disabled, tachful disabled
     def setDefaults(self):
-        self.bus.write8(self.MAX31760_CR1, self.MAX31760_CTRL1_PWM_FREQ_33_HZ | self.MAX31760_CTRL1_PWM_POL_POS)
+        self.bus.write8(self.MAX31760_CR1, self.MAX31760_CTRL1_PWM_FREQ_25_KHZ | self.MAX31760_CTRL1_PWM_POL_POS)
         self.bus.write8(self.MAX31760_CR2, self.MAX31760_CTRL2_NORMAL_MODE | self.MAX31760_CTRL2_ALERT_COMP | self.MAX31760_CTRL2_FF_OUTPUT_COMP | self.MAX31760_CTRL2_DIRECT_FAN_CTRL_EN)
-        self.bus.write8(self.MAX31760_CR3, self.MAX31760_CTRL3_CLR_FAIL | self.MAX31760_CTRL3_PWM_RAMP_RATE_FAST | self.MAX31760_CTRL3_PULSE_STRETCH_EN | self.MAX31760_CTRL3_TACH1_EN)
+        self.bus.write8(self.MAX31760_CR3, self.MAX31760_CTRL3_CLR_FAIL | self.MAX31760_CTRL3_PWM_RAMP_RATE_FAST | self.MAX31760_CTRL3_TACH1_EN)
         return True
 
     # Clear fan fail status bits 
     def clearFF(self):
         cr3_val = self.bus.readU8(self.MAX31760_CR3)
         self.bus.write8(self.MAX31760_CR3, cr3_val | self.MAX31760_CTRL3_CLR_FAIL)
+        return True
+
+    # Send software Power-On Reset command
+    def sendPOR(self):
+        # We don't need to read CR1 and AND as POR will wipe everything else out
+        self.bus.write8(self.MAX31760_CR1, self.MAX31760_CTRL1_SW_POR)
         return True
 
     # Read the Tach count threshold
