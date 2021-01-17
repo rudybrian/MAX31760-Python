@@ -153,11 +153,11 @@ print '\nReading tach 2'
 tach2 = device.readTach2()
 print 'Tach 2=' + str(tach2)
 
-print '\nWriting fan LUT value for lt18 to 99'
-device.writeFanLUT('lt18', 99)
+print '\nWriting fan LUT value for 110-125 to 99'
+device.writeFanLUT(125, 99)
 
 print '\nReading the fan LUT'
 fan_LUT = device.readFanLUT()
 for key in sorted(fan_LUT):
-    print(key, '->', fan_LUT[key])
+    print(str(key) + ': low=' + str(fan_LUT[key]['low']) + ", high=" + str(fan_LUT[key]['high']) + ', temp=' + str(fan_LUT[key]['temp']))
 

@@ -24,7 +24,6 @@
 ##########
 ##########
 
-
 from time import sleep
 from Adafruit_I2C import Adafruit_I2C
 
@@ -224,54 +223,54 @@ class MAX31760(Adafruit_I2C):
 
     ## Ideality LUT ##
     MAX31760_FAN_LUT       = {
-                             "lt18":    0x20,
-                             "18-20":   0x21,
-                             "20-22":   0x22,
-                             "22-24":   0x23,
-                             "24-26":   0x24,
-                             "26-28":   0x25,
-                             "28-30":   0x26,
-                             "30-32":   0x27,
-                             "32-34":   0x28,
-                             "34-36":   0x29,
-                             "36-38":   0x2A,
-                             "38-40":   0x2B,
-                             "40-42":   0x2C,
-                             "42-44":   0x2D,
-                             "44-46":   0x2E,
-                             "46-48":   0x2F,
-                             "48-50":   0x30,
-                             "50-52":   0x31,
-                             "52-54":   0x32,
-                             "54-56":   0x33,
-                             "56-58":   0x34,
-                             "58-60":   0x35,
-                             "60-62":   0x36,
-                             "62-64":   0x37,
-                             "64-66":   0x38,
-                             "66-68":   0x39,
-                             "68-70":   0x3A,
-                             "70-72":   0x3B,
-                             "72-74":   0x3C,
-                             "74-76":   0x3D,
-                             "76-78":   0x3E,
-                             "78-80":   0x3F,
-                             "80-82":   0x40,
-                             "82-84":   0x41,
-                             "84-86":   0x42,
-                             "86-88":   0x43,
-                             "88-90":   0x44,
-                             "90-92":   0x45,
-                             "92-94":   0x46,
-                             "94-96":   0x47,
-                             "96-98":   0x48,
-                             "98-100":  0x49,
-                             "100-102": 0x4A,
-                             "102-104": 0x4B,
-                             "104-106": 0x4C,
-                             "106-108": 0x4D,
-                             "108-110": 0x4E,
-                             "gt110":   0x4F
+                             1: {'low': -55, 'high': 18, 'addr': 0x20},
+                             2: {'low': 18, 'high': 20, 'addr': 0x21},
+                             3: {'low': 20, 'high': 22, 'addr': 0x22},
+                             4: {'low': 22, 'high': 24, 'addr': 0x23},
+                             5: {'low': 24, 'high': 26, 'addr': 0x24},
+                             6: {'low': 26, 'high': 28, 'addr': 0x25},
+                             7: {'low': 28, 'high': 30, 'addr': 0x26},
+                             8: {'low': 30, 'high': 32, 'addr': 0x27},
+                             9: {'low': 32, 'high': 34, 'addr': 0x28},
+                             10: {'low': 34, 'high': 36, 'addr': 0x29},
+                             11: {'low': 36, 'high': 38, 'addr': 0x2A},
+                             12: {'low': 38, 'high': 40, 'addr': 0x2B},
+                             13: {'low': 40, 'high': 42, 'addr': 0x2C},
+                             14: {'low': 42, 'high': 44, 'addr': 0x2D},
+                             15: {'low': 44, 'high': 46, 'addr': 0x2E},
+                             16: {'low': 46, 'high': 48, 'addr': 0x2F},
+                             17: {'low': 48, 'high': 50, 'addr': 0x30},
+                             18: {'low': 50, 'high': 52, 'addr': 0x31},
+                             19: {'low': 52, 'high': 54, 'addr': 0x32},
+                             20: {'low': 54, 'high': 56, 'addr': 0x33},
+                             21: {'low': 56, 'high': 58, 'addr': 0x34},
+                             22: {'low': 58, 'high': 60, 'addr': 0x35},
+                             23: {'low': 60, 'high': 62, 'addr': 0x36},
+                             24: {'low': 62, 'high': 64, 'addr': 0x37},
+                             25: {'low': 64, 'high': 66, 'addr': 0x38},
+                             26: {'low': 66, 'high': 68, 'addr': 0x39},
+                             27: {'low': 68, 'high': 70, 'addr': 0x3A},
+                             28: {'low': 70, 'high': 72, 'addr': 0x3B},
+                             29: {'low': 72, 'high': 74, 'addr': 0x3C},
+                             30: {'low': 74, 'high': 76, 'addr': 0x3D},
+                             31: {'low': 76, 'high': 78, 'addr': 0x3E},
+                             32: {'low': 78, 'high': 80, 'addr': 0x3F},
+                             33: {'low': 80, 'high': 82, 'addr': 0x40},
+                             34: {'low': 82, 'high': 84, 'addr': 0x41},
+                             35: {'low': 84, 'high': 86, 'addr': 0x42},
+                             36: {'low': 86, 'high': 88, 'addr': 0x43},
+                             37: {'low': 88, 'high': 90, 'addr': 0x44},
+                             38: {'low': 90, 'high': 92, 'addr': 0x45},
+                             39: {'low': 92, 'high': 94, 'addr': 0x46},
+                             40: {'low': 94, 'high': 96, 'addr': 0x47},
+                             41: {'low': 96, 'high': 98, 'addr': 0x48},
+                             42: {'low': 98, 'high': 100, 'addr': 0x49},
+                             43: {'low': 100, 'high': 102, 'addr': 0x4A},
+                             44: {'low': 102, 'high': 104, 'addr': 0x4B},
+                             45: {'low': 104, 'high': 106, 'addr': 0x4C},
+                             46: {'low': 106, 'high': 108, 'addr': 0x4D},
+                             47: {'low': 108, 'high': 110, 'addr': 0x4E},
+                             48: {'low': 110, 'high': 125, 'addr': 0x4F}
                              }
 
     # CR1 LUTs
@@ -510,17 +509,19 @@ class MAX31760(Adafruit_I2C):
     def readFanLUT(self):
         fan_LUT_dict = {}
         for key, value in self.MAX31760_FAN_LUT.items():
-            fan_LUT_dict[key] = int(round(self.bus.readU8(value) * self.MAX31760_FAN2_RESOL_SPEED_PER))
+            fan_LUT_dict[key] = {}
+            fan_LUT_dict[key]['temp'] = int(round(self.bus.readU8(value['addr']) * self.MAX31760_FAN2_RESOL_SPEED_PER))
+            fan_LUT_dict[key]['low'] = value['low']
+            fan_LUT_dict[key]['high'] = value['high']
         return fan_LUT_dict
 
     # Write a value into the fan LUT
-    def writeFanLUT(self, temp_range, duty_percent):
-        current_LUT = self.readFanLUT
-        if (self.MAX31760_FAN_LUT[temp_range]):
-            self.bus.write8(self.MAX31760_FAN_LUT[temp_range], int(round(duty_percent / self.MAX31760_FAN2_RESOL_SPEED_PER, 2)))
-            return True
-        else:
-            return False
+    def writeFanLUT(self, temp_high, duty_percent):
+        for key, value in self.MAX31760_FAN_LUT.items():
+            if (value['high'] == temp_high):
+                self.bus.write8(value['addr'], int(round(duty_percent / self.MAX31760_FAN2_RESOL_SPEED_PER)))
+                return True
+        return False
 
 
     ### utility functions
