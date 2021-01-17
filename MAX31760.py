@@ -274,6 +274,63 @@ class MAX31760(Adafruit_I2C):
                              "gt110":   0x4F
                              }
 
+    # CR1 LUTs
+    MAX31760_ALTMSK_MODE   = {
+                             "enabled":     0,
+                             "masked":      MAX31760_CTRL1_MASK_TEMP_ALERTS
+                             }
+
+    MAX31760_HYST_LUT      = {
+                             2:             MAX31760_CTRL1_LUT_HYST_2_CELS,
+                             4:             MAX31760_CTRL1_LUT_HYST_4_CELS
+                             }
+
+    MAX31760_PWM_FREQ_LUT  = {
+                             "33Hz":        MAX31760_CTRL1_PWM_FREQ_33_HZ,
+                             "150Hz":       MAX31760_CTRL1_PWM_FREQ_150_HZ,
+                             "1500Hz":      MAX31760_CTRL1_PWM_FREQ_1500_HZ,
+                             "25kHz":       MAX31760_CTRL1_PWM_FREQ_25_KHZ
+                             }
+
+    MAX31760_POL_LUT       = {
+                             "positive":    MAX31760_CTRL1_PWM_POL_POS,
+                             "negative":    MAX31760_CTRL1_PWM_POL_NEG
+                             }
+
+    MAX31760_MTI_LUT       = {
+                             "temp_index_source": MAX31760_CTRL1_TEMP_IDX_TIS,
+                             "local_remote_max":  MAX31760_CTRL1_TEMP_IDX_GREATER
+                             }
+
+    MAX31760_TIS_LUT       = {
+                             "local":       MAX31760_CTRL1_LUT_IDX_LOCAL_TEMP,
+                             "remote":      MAX31760_CTRL1_LUT_IDX_REMOTE_TEMP
+                             }
+
+    # CR2 LUTs
+    MAX31760_INT_COMP_MODE = {
+                             "interrupt":   0,
+                             "comparator":  1
+                             }
+
+    MAX31760_RDPS_MODE     = {
+                             "low":         MAX31760_CTRL2_RD_ACTIVE_LOW,
+                             "high":        MAX31760_CTRL2_RD_ACTIVE_HIGH
+                             }
+
+    MAX31760_FSST_MODE     = {
+                             "square-wave": MAX31760_CTRL2_TACHO_SQUARE_WAVE,
+                             "RD-signal":   MAX31760_CTRL2_TACHO_RD
+                             }
+
+    # CR3 LUT
+    MAX31760_PWM_RAMP_RATE = {
+                             "slow":        MAX31760_CTRL3_PWM_RAMP_RATE_SLOW,
+                             "slow-medium": MAX31760_CTRL3_PWM_RAMP_RATE_SLOW_MEDIUM,
+                             "medium-fast": MAX31760_CTRL3_PWM_RAMP_RATE_MEDIUM_FAST,
+                             "fast":        MAX31760_CTRL3_PWM_RAMP_RATE_FAST
+                             }
+
     #### Functions ####
 
     def __init__(self, addr = None, busnum = -1, debug = False):
@@ -291,12 +348,11 @@ class MAX31760(Adafruit_I2C):
         return True
 
 
-    def sendCommand(self, cmd, args):
-        res = self.bus.writeList(cmd, args)
-
-        sleep(0.05)
-        #self.waitStatus()
-        return res
+    def invertDict(self, in_dict):
+        out_dict = {}
+        for key, value in in_dict.items():
+            out_dict[value] = key
+        return out_dict
 
     def readTemp(self, start_addr):
         TH = self.bus.readS8(start_addr)
@@ -346,9 +402,7 @@ class MAX31760(Adafruit_I2C):
     def readIdeality(self):
         ideality_raw = self.bus.readU8(self.MAX31760_IFR)
         # Reverse the keys and values in the dictionary to make matching easier
-        reversed_ideality_dict = {}
-        for key, value in self.MAX31760_IDEALITY.items():
-            reversed_ideality_dict[value] = key
+        reversed_ideality_dict = self.invertDict(self.MAX31760_IDEALITY)
         return reversed_ideality_dict[ideality_raw]
  
     # Write the remote diode ideality factor
@@ -401,40 +455,50 @@ class MAX31760(Adafruit_I2C):
 
     # Read control register 1
     def readControlRegister1(self):
+        altmsk_mode_inverted = self.invertDict(self.MAX31760_ALTMSK_MODE)
+        hyst_LUT_inverted = self.invertDict(self.MAX31760_HYST_LUT)
+        PWM_freq_LUT_inverted = self.invertDict(self.MAX31760_PWM_FREQ_LUT)
+        polarity_LUT_inverted = self.invertDict(self.MAX31760_POL_LUT)
+        max_temp_index_LUT_inverted = self.invertDict(self.MAX31760_MTI_LUT)
+        temp_index_source_LUT_inverted = self.invertDict(self.MAX31760_TIS_LUT)
         control_int = self.bus.readU8(self.MAX31760_CR1)
         control_dict = {
-                     "alert_mask":              int((control_int & self.MAX31760_CTRL1_MASK_TEMP_ALERTS) > 0),
-                     "software_POR":            control_int & self.MAX31760_CTRL1_SW_POR,
-                     "LUT_hysteresis":          int((control_int & self.MAX31760_CTRL1_LUT_HYST_4_CELS) > 0),
-                     "PWM_frequency":           (control_int & self.MAX31760_CTRL1_PWM_FREQ_25_KHZ) >> 3,
-                     "PWM_polarity":            int((control_int & self.MAX31760_CTRL1_PWM_POL_NEG) > 0),
-                     "max_temp_as_index":       int((control_int & self.MAX31760_CTRL1_TEMP_IDX_GREATER) > 0),
-                     "temp_index_source":       int((control_int & self.MAX31760_CTRL1_LUT_IDX_REMOTE_TEMP) > 0)
+                     "alert_mask":              altmsk_mode_inverted[control_int & self.MAX31760_CTRL1_MASK_TEMP_ALERTS],
+                     "software_POR":            (control_int & self.MAX31760_CTRL1_SW_POR) > 0,
+                     "LUT_hysteresis":          hyst_LUT_inverted[control_int & self.MAX31760_CTRL1_LUT_HYST_4_CELS],
+                     "PWM_frequency":           PWM_freq_LUT_inverted[control_int & self.MAX31760_CTRL1_PWM_FREQ_25_KHZ],
+                     "PWM_polarity":            polarity_LUT_inverted[control_int & self.MAX31760_CTRL1_PWM_POL_NEG],
+                     "max_temp_as_index":       max_temp_index_LUT_inverted[control_int & self.MAX31760_CTRL1_TEMP_IDX_GREATER],
+                     "temp_index_source":       temp_index_source_LUT_inverted[control_int & self.MAX31760_CTRL1_LUT_IDX_REMOTE_TEMP]
                        }
         return control_dict
 
     # Read control register 2
     def readControlRegister2(self):
+        int_comp_LUT_inverted = self.invertDict(self.MAX31760_INT_COMP_MODE)
+        rdps_mode_inverted = self.invertDict(self.MAX31760_RDPS_MODE)
+        fsst_mode_inverted = self.invertDict(self.MAX31760_FSST_MODE)
         control_int = self.bus.readU8(self.MAX31760_CR2)
         control_dict = {
                      "standby_enable":              (control_int & self.MAX31760_CTRL2_STANDBY_MODE) > 0,
-                     "alert_selection":             int((control_int & self.MAX31760_CTRL2_ALERT_COMP) > 0),
+                     "alert_selection":             int_comp_LUT_inverted[(control_int & self.MAX31760_CTRL2_ALERT_COMP) > 0],
                      "spin_up_enable":              (control_int & self.MAX31760_CTRL2_ALERT_COMP) > 0,
-                     "fan_fault_mode":              int((control_int & self.MAX31760_CTRL2_FF_OUTPUT_COMP) > 0),
+                     "fan_fault_mode":              int_comp_LUT_inverted[(control_int & self.MAX31760_CTRL2_FF_OUTPUT_COMP) > 0],
                      "FS_input_enable":             (control_int & self.MAX31760_CTRL2_FS_INPUT_EN) > 0,
-                     "rotation_detection_polarity": int((control_int & self.MAX31760_CTRL2_RD_ACTIVE_HIGH) > 0),
-                     "fan_sense_signal_type":       int((control_int & self.MAX31760_CTRL2_TACHO_RD) > 0),
+                     "rotation_detection_polarity": rdps_mode_inverted[control_int & self.MAX31760_CTRL2_RD_ACTIVE_HIGH],
+                     "fan_sense_signal_type":       fsst_mode_inverted[control_int & self.MAX31760_CTRL2_TACHO_RD],
                      "direct_fan_control_enable":   (control_int & self.MAX31760_CTRL2_DIRECT_FAN_CTRL_EN) > 0
                        }
         return control_dict
  
     # Read control register 3
     def readControlRegister3(self):
+        ramp_rate_LUT_inverted = self.invertDict(self.MAX31760_PWM_RAMP_RATE)
         control_int = self.bus.readU8(self.MAX31760_CR3)
         control_dict = {
-                     "clear_fan_fail":             int((control_int & self.MAX31760_CTRL3_CLR_FAIL) > 0),
-                     "fan_fail_detect_enable":     int((control_int & self.MAX31760_CTRL3_FF_DETECT_EN) > 0),
-                     "PWM_ramp_rate":              (control_int & self.MAX31760_CTRL3_PWM_RAMP_RATE_FAST) >> 4,
+                     "clear_fan_fail":             (control_int & self.MAX31760_CTRL3_CLR_FAIL) > 0,
+                     "fan_fail_detect_enable":     (control_int & self.MAX31760_CTRL3_FF_DETECT_EN) > 0,
+                     "PWM_ramp_rate":              ramp_rate_LUT_inverted[control_int & self.MAX31760_CTRL3_PWM_RAMP_RATE_FAST],
                      "tach_full_enable":           (control_int & self.MAX31760_CTRL3_TACHFULL_EN) > 0,
                      "pulse_stretch_enable":       (control_int & self.MAX31760_CTRL3_PULSE_STRETCH_EN) > 0,
                      "tach2_enable":               (control_int & self.MAX31760_CTRL3_TACH2_EN) > 0,
