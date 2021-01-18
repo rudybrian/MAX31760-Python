@@ -73,6 +73,9 @@ print 'remote_overtemp_alarm=' + str(status['remote_overtemp_alarm'])
 print 'tach2_alarm=' + str(status['tach2_alarm'])
 print 'tach1_alarm=' + str(status['tach1_alarm'])
 
+print '\nWriting tach1 to alert mask'
+device.writeAlertMask('tach2', True)
+
 print '\nReading the alert mask register'
 alert = device.readAlertMask()
 print 'local_temp_high=' + str(alert['local_temp_high'])
