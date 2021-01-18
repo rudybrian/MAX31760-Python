@@ -454,62 +454,42 @@ class MAX31760(Adafruit_I2C):
         alert_dict = self.readAlertMask()
         if (param in alert_dict):
             if (param == "local_temp_high"):
-                if (value):
-                    val_masked = self.MAX31760_ALERT_MASK_LOCAL_TEMP_HIGH | alert_int
-                else:
-                    if (alert_int & self.MAX31760_ALERT_MASK_LOCAL_TEMP_HIGH):
-                        val_masked = alert_int ^ self.MAX31760_ALERT_MASK_LOCAL_TEMP_HIGH
-                    else:
-                        val_masked = alert_int
+                val_masked = self.MAX31760_ALERT_MASK_LOCAL_TEMP_HIGH
             elif (param == "local_overtemp"):
-                if (value):
-                    val_masked = self.MAX31760_ALERT_MASK_LOCAL_OVERTEMP | alert_int
-                else:
-                    if (alert_int & self.MAX31760_ALERT_MASK_LOCAL_OVERTEMP):
-                        val_masked = alert_int ^ self.MAX31760_ALERT_MASK_LOCAL_OVERTEMP
-                    else:
-                        val_masked = alert_int
+                val_masked = self.MAX31760_ALERT_MASK_LOCAL_OVERTEMP
             elif (param == "remote_temp_high"):
-                if (value):
-                    val_masked = self.MAX31760_ALERT_MASK_REMOTE_TEMP_HIGH | alert_int
-                else:
-                    if (alert_int & self.MAX31760_ALERT_MASK_REMOTE_TEMP_HIGH):
-                        val_masked = alert_int ^ self.MAX31760_ALERT_MASK_REMOTE_TEMP_HIGH
-                    else:
-                        val_masked = alert_int
+                val_masked = self.MAX31760_ALERT_MASK_REMOTE_TEMP_HIGH
             elif (param == "remote_overtemp"):
-                if (value):
-                    val_masked = self.MAX31760_ALERT_MASK_REMOTE_OVERTEMP | alert_int
-                else:
-                    if (alert_int & self.MAX31760_ALERT_MASK_REMOTE_OVERTEMP):
-                        val_masked = alert_int ^ self.MAX31760_ALERT_MASK_REMOTE_OVERTEMP
-                    else:
-                        val_masked = alert_int
+                val_masked = self.MAX31760_ALERT_MASK_REMOTE_OVERTEMP
             elif (param == "tach2"):
-                if (value):
-                    val_masked = self.MAX31760_ALERT_MASK_TACH2 | alert_int
-                else:
-                    if (alert_int & self.MAX31760_ALERT_MASK_TACH2):
-                        val_masked = alert_int ^ self.MAX31760_ALERT_MASK_TACH2
-                    else:
-                        val_masked = alert_int
+                val_masked = self.MAX31760_ALERT_MASK_TACH2
             elif (param == "tach1"):
-                if (value):
-                    val_masked = self.MAX31760_ALERT_MASK_TACH1 | alert_int
-                else:
-                    if (alert_int & self.MAX31760_ALERT_MASK_TACH1):
-                        val_masked = alert_int ^ self.MAX31760_ALERT_MASK_TACH1
-                    else:
-                        val_masked = alert_int
+                val_masked = self.MAX31760_ALERT_MASK_TACH1
             else:
                 return False
-            self.bus.write8(self.MAX31760_MASK, val_masked)
+            if (value):
+                val_composite = val_masked | alert_int
+            else:
+                if (alert_int & val_masked):
+                    val_composite = alert_int ^ val_masked
+                else:
+                    val_composite = alert_int
+            self.bus.write8(self.MAX31760_MASK, val_composite)
             return True
         else:
             return False
             
     # Read the fan fault duty cycle register
+    def readFanFaultDutyCycle(self):
+        duty = self.bus.readU8(self.MAX31760_FFDC)
+        duty_percent = int(round(duty * self.MAX31760_RESOL_SPEED_PER))
+        return duty_percent
+
     # Write the fan fault duty cycle register
+    def writeFanFaultDutyCycle(self, duty_percent):
+        duty = int(round(duty_percent / self.MAX31760_RESOL_SPEED_PER))
+        self.bus.write8(self.MAX31760_FFDC, duty)
+        return True
 
     # Read control register 1
     def readControlRegister1(self):
@@ -531,6 +511,8 @@ class MAX31760(Adafruit_I2C):
                        }
         return control_dict
 
+    # Write control register 1
+
     # Read control register 2
     def readControlRegister2(self):
         int_comp_LUT_inverted = self.invertDict(self.MAX31760_INT_COMP_MODE)
@@ -548,7 +530,9 @@ class MAX31760(Adafruit_I2C):
                      "direct_fan_control_enable":   (control_int & self.MAX31760_CTRL2_DIRECT_FAN_CTRL_EN) > 0
                        }
         return control_dict
- 
+
+    # Write control register 2
+
     # Read control register 3
     def readControlRegister3(self):
         ramp_rate_LUT_inverted = self.invertDict(self.MAX31760_PWM_RAMP_RATE)
@@ -563,6 +547,8 @@ class MAX31760(Adafruit_I2C):
                      "tach1_enable":               (control_int & self.MAX31760_CTRL3_TACH1_EN) > 0
                        }
         return control_dict
+
+    # Write control register 3
 
     # Read the values in the fan LUT
     def readFanLUT(self):
@@ -582,6 +568,15 @@ class MAX31760(Adafruit_I2C):
                 return True
         return False
 
+    # Write EEPROM to RAM
+    def writeEEPROMToRAM(self):
+        self.bus.write8(self.MAX31760_CMD_EEPROM, self.MAX31760_EEPROM_READ)
+        return True
+
+    # Write RAM to EEPROM
+    def writeRAMToEEPROM(self):
+        self.bus.write8(self.MAX31760_CMD_EEPROM, self.MAX31760_EEPROM_WRITE)
+        return True
 
     ### utility functions
 

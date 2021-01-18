@@ -34,8 +34,8 @@ def MAX31760_start():
 print 'Starting up'
 MAX31760_start()
 
-print '\nsetting some sane defaults'
-device.setDefaults()
+#print '\nsetting some sane defaults'
+#device.setDefaults()
 
 print '\nSetting remote diode ideality factor'
 device.writeIdeality('1.0050')
@@ -73,7 +73,7 @@ print 'remote_overtemp_alarm=' + str(status['remote_overtemp_alarm'])
 print 'tach2_alarm=' + str(status['tach2_alarm'])
 print 'tach1_alarm=' + str(status['tach1_alarm'])
 
-print '\nWriting tach1 to alert mask'
+print '\nWriting tach2 to alert mask (this prevents it from generating alerts)'
 device.writeAlertMask('tach2', True)
 
 print '\nReading the alert mask register'
@@ -84,6 +84,13 @@ print 'remote_temp_high=' + str(alert['remote_temp_high'])
 print 'remote_overtemp=' + str(alert['remote_overtemp'])
 print 'tach2=' + str(alert['tach2'])
 print 'tach1=' + str(alert['tach1'])
+
+print '\nSetting the Fan Fault Duty Cycle to 99'
+device.writeFanFaultDutyCycle(99)
+
+print '\nReading the Fan Fault Duty Cycle'
+ffdc = device.readFanFaultDutyCycle()
+print 'Fan Fault Duty Cycle=' + str(ffdc)
 
 print '\nReading control register 1'
 cr1 = device.readControlRegister1()
