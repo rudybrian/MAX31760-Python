@@ -512,6 +512,45 @@ class MAX31760(Adafruit_I2C):
         return control_dict
 
     # Write control register 1
+    def writeControlRegister1(self, param, value):
+        control_int = self.bus.readU8(self.MAX31760_CR1)
+        if (param == "alert_mask"):
+            if (value in self.MAX31760_ALTMSK_MODE):
+                val_composite = ((control_int | self.MAX31760_CTRL1_MASK_TEMP_ALERTS) ^ self.MAX31760_CTRL1_MASK_TEMP_ALERTS) | self.MAX31760_ALTMSK_MODE[value]
+            else:
+                return False
+        elif (param == "software_POR"):
+            if (value):
+                val_composite = MAX31760_CTRL1_SW_POR # We don't need special logic here, as this will clear everything in RAM on POR.
+            else:
+                val_composite = control_int
+        elif (param == "LUT_hysteresis"):
+            if (value in self.MAX31760_HYST_LUT):
+                val_composite = ((control_int | self.MAX31760_CTRL1_LUT_HYST_4_CELS) ^ self.MAX31760_CTRL1_LUT_HYST_4_CELS) | self.MAX31760_HYST_LUT[value]
+            else:
+                return False
+        elif (param == "PWM_frequency"):
+            if (value in self.MAX31760_PWM_FREQ_LUT):
+                val_composite = ((control_int | self.self.MAX31760_CTRL1_PWM_FREQ_25_KHZ) ^ self.self.MAX31760_CTRL1_PWM_FREQ_25_KHZ) | self.MAX31760_PWM_FREQ_LUT[value]
+            else:
+                return False
+        elif (param == "PWM_polarity"):
+            if (value in self.MAX31760_POL_LUT):
+                val_composite = ((control_int | self.MAX31760_CTRL1_PWM_POL_NEG) ^ self.MAX31760_CTRL1_PWM_POL_NEG) | self.MAX31760_POL_LUT[value]
+            else:
+                return False
+        elif (param == "max_temp_as_index"):
+            if (value in self.MAX31760_MTI_LUT):
+                val_composite = ((control_int | self.MAX31760_CTRL1_TEMP_IDX_GREATER) ^ self.MAX31760_CTRL1_TEMP_IDX_GREATER) | self.MAX31760_MTI_LUT[value]
+            else:
+                return False
+        elif (param == "temp_index_source"):
+            if (value in self.MAX31760_TIS_LUT):
+                val_composite = ((control_int | self.MAX31760_CTRL1_LUT_IDX_REMOTE_TEMP) ^ self.MAX31760_CTRL1_LUT_IDX_REMOTE_TEMP) | self.MAX31760_TIS_LUT[value]
+        else:
+            return False
+        self.bus.write8(self.MAX31760_CR1, val_composite)
+        return True
 
     # Read control register 2
     def readControlRegister2(self):

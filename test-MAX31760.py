@@ -92,6 +92,9 @@ print '\nReading the Fan Fault Duty Cycle'
 ffdc = device.readFanFaultDutyCycle()
 print 'Fan Fault Duty Cycle=' + str(ffdc)
 
+print '\nSetting CR1 temp_index_source=remote'
+device.writeControlRegister1('temp_index_source', 'remote')
+
 print '\nReading control register 1'
 cr1 = device.readControlRegister1()
 print 'alert_mask=' + str(cr1['alert_mask'])
