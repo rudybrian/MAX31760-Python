@@ -105,6 +105,9 @@ print 'PWM_polarity=' + str(cr1['PWM_polarity'])
 print 'max_temp_as_index=' + str(cr1['max_temp_as_index'])
 print 'temp_index_source=' + str(cr1['temp_index_source'])
 
+print '\nSetting CR2 spin_up_enable=False'
+device.writeControlRegister2('spin_up_enable', False)
+
 print '\nReading control register 2'
 cr2 = device.readControlRegister2()
 print 'standby_enable=' + str(cr2['standby_enable'])

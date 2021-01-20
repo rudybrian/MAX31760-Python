@@ -571,6 +571,52 @@ class MAX31760(Adafruit_I2C):
         return control_dict
 
     # Write control register 2
+    def writeControlRegister2(self, param, value):
+        control_int = self.bus.readU8(self.MAX31760_CR2)
+        if (param == "standby_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL2_STANDBY_MODE
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL2_STANDBY_MODE) ^ self.MAX31760_CTRL2_STANDBY_MODE
+        elif (param == "alert_selection"):
+            if (value in self.MAX31760_INT_COMP_MODE):
+                val_composite = ((control_int | self.MAX31760_CTRL2_ALERT_COMP) ^ self.MAX31760_CTRL2_ALERT_COMP) | self.MAX31760_INT_COMP_MODE[value]
+            else:
+                return False
+        elif (param == "spin_up_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL2_ALERT_COMP
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL2_ALERT_COMP) ^  self.MAX31760_CTRL2_ALERT_COMP
+        elif (param == "fan_fault_mode"):
+            if (value in self.MAX31760_INT_COMP_MODE):
+                val_composite = ((control_int | self.MAX31760_CTRL2_FF_OUTPUT_COMP) ^ self.MAX31760_CTRL2_FF_OUTPUT_COMP) | self.MAX31760_INT_COMP_MODE[value]
+            else:
+                return False
+        elif (param == "FS_input_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL2_FS_INPUT_EN
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL2_FS_INPUT_EN) ^ self.MAX31760_CTRL2_FS_INPUT_EN
+        elif (param == "rotation_detection_polarity"):
+            if (value in self.MAX31760_RDPS_MODE):
+                val_composite = ((control_int | self.MAX31760_CTRL2_RD_ACTIVE_HIGH) ^ self.MAX31760_CTRL2_RD_ACTIVE_HIGH) | self.MAX31760_RDPS_MODE[value]
+            else:
+                return False
+        elif (param == "fan_sense_signal_type"):
+            if (value in self.MAX31760_FSST_MODE):
+                val_composite = ((control_int | self.MAX31760_CTRL2_TACHO_RD) ^ self.MAX31760_CTRL2_TACHO_RD) | self.MAX31760_FSST_MODE[value]
+            else:
+                return False
+        elif (param == "direct_fan_control_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL2_DIRECT_FAN_CTRL_EN
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL2_DIRECT_FAN_CTRL_EN) ^ self.MAX31760_CTRL2_DIRECT_FAN_CTRL_EN
+        else:
+            return False
+        self.bus.write8(self.MAX31760_CR2, val_composite)
+        return True
 
     # Read control register 3
     def readControlRegister3(self):
