@@ -1,30 +1,24 @@
 #!/usr/bin/python
 
-##########
-##########
-##
-## Python class for MAX31760
-##
-##### Description #####
-##
-## Basic control functions for the MAX31760 fan speed controller. Extensive 
-## code re-use from the Mikroe Fan 2 Click C library.
-##
-## Latest version can be found https://github.com/rudybrian/MAX31760-Python/
-##
-##### Additional References #####
-##
-## https://www.maximintegrated.com/en/products/sensors/MAX31760.html
-## https://www.mikroe.com/fan-2-click
-## 
-##### Revision History #####
-##
-## v0.1 01/10/2021 Brian Rudy (brudyNO@SPAMpraecogito.com) First working version
-##
-##########
-##########
+""" Python module for MAX31760
 
-from time import sleep
+Basic control functions for the MAX31760 fan speed controller. The Mikroe Fan 2 Click C library had a strong influence on this module
+
+Latest version can be found https://github.com/rudybrian/MAX31760-Python/
+
+## Additional References ##
+
+Maxim documentation
+https://www.maximintegrated.com/en/products/sensors/MAX31760.html
+
+Mikroe Fan2 Click
+https://www.mikroe.com/fan-2-click
+"""
+
+__author__  = 'Brian Rudy'
+__version__ = '0.1'
+__date__    = '1/10/2021'
+
 from Adafruit_I2C import Adafruit_I2C
 
 class MAX31760(Adafruit_I2C):
@@ -634,6 +628,47 @@ class MAX31760(Adafruit_I2C):
         return control_dict
 
     # Write control register 3
+    def writeControlRegister3(self, param, value):
+        control_int = self.bus.readU8(self.MAX31760_CR3)
+        if (param == "clear_fan_fail"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL3_CLR_FAIL
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL3_CLR_FAIL) ^ self.MAX31760_CTRL3_CLR_FAIL
+        elif (param == "fan_fail_detect_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL3_FF_DETECT_EN
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL3_FF_DETECT_EN) ^ self.MAX31760_CTRL3_FF_DETECT_EN
+        elif (param == "PWM_ramp_rate"):
+            if (value in self.MAX31760_PWM_RAMP_RATE):
+                val_composite = ((control_int | self.MAX31760_CTRL3_PWM_RAMP_RATE_FAST) ^ self.MAX31760_CTRL3_PWM_RAMP_RATE_FAST) | self.MAX31760_PWM_RAMP_RATE[value]
+            else:
+                return False
+        elif (param == "tach_full_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL3_TACHFULL_EN
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL3_TACHFULL_EN) ^ self.MAX31760_CTRL3_TACHFULL_EN
+        elif (param == "pulse_stretch_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL3_PULSE_STRETCH_EN
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL3_PULSE_STRETCH_EN) ^ self.MAX31760_CTRL3_PULSE_STRETCH_EN
+        elif (param == "tach2_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL3_TACH2_EN
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL3_TACH2_EN) ^ self.MAX31760_CTRL3_TACH2_EN
+        elif (param == "tach1_enable"):
+            if (value):
+                val_composite = control_int | self.MAX31760_CTRL3_TACH1_EN
+            else:
+                val_composite = (control_int | self.MAX31760_CTRL3_TACH1_EN) ^ self.MAX31760_CTRL3_TACH1_EN
+        else:
+            return False
+        self.bus.write8(self.MAX31760_CR3, val_composite)
+        return True
 
     # Read the values in the fan LUT
     def readFanLUT(self):

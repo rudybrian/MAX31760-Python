@@ -119,6 +119,9 @@ print 'rotation_detection_polarity=' + str(cr2['rotation_detection_polarity'])
 print 'fan_sense_signal_type=' + str(cr2['fan_sense_signal_type'])
 print 'direct_fan_control_enable=' + str(cr2['direct_fan_control_enable'])
 
+print '\nSetting CR3 PWM_ramp_rate=medium-fast'
+device.writeControlRegister3('PWM_ramp_rate', 'medium-fast')
+
 print '\nReading control register 3'
 cr3 = device.readControlRegister3()
 print 'clear_fan_fail=' + str(cr3['clear_fan_fail'])
