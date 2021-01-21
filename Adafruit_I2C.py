@@ -28,11 +28,34 @@ class Adafruit_I2C(object):
         return 0
     except:
       return 0
+  
+  @staticmethod
+  def platform_detect():
+    """Detects if the platform is a Pi or BBB"""
+    try:
+      with open('/proc/cpuinfo', 'r') as infile:
+        modelinfo = infile.read()
+        # Match a line like 'Raspberry Pi 4 Model B Rev 1.2'
+        match = re.search('^(\w+\s\w+)\s+', modelinfo)
+        if not match:
+          # Couldn't find the hardware, assume it isn't a pi.
+          return False
+        if match.group(1) == 'Raspberry Pi':
+          return True
+        else:
+          return False
+    except IOError:
+      # issue opening or reading the file
+      return False
 
   @staticmethod
-  def getPiI2CBusNumber():
+  def getI2CBusNumber():
     # Gets the I2C bus number /dev/i2c#
-    return 1 if Adafruit_I2C.getPiRevision() > 1 else 0
+    if (Adafruit_I2C.platform_detect()):
+      # This is a pi, so check the version
+      return 1 if Adafruit_I2C.getPiRevision() > 1 else 0
+    else:
+      return 1
 
   def __init__(self, address, busnum=-1, debug=False):
     self.address = address
@@ -40,7 +63,7 @@ class Adafruit_I2C(object):
     # Alternatively, you can hard-code the bus version below:
     # self.bus = smbus.SMBus(0); # Force I2C0 (early 256MB Pi's)
     # self.bus = smbus.SMBus(1); # Force I2C1 (512MB Pi's)
-    self.bus = smbus.SMBus(busnum if busnum >= 0 else Adafruit_I2C.getPiI2CBusNumber())
+    self.bus = smbus.SMBus(busnum if busnum >= 0 else Adafruit_I2C.getI2CBusNumber())
     self.debug = debug
 
   def reverseByteOrder(self, data):
